@@ -271,14 +271,19 @@ const { courseId, courseTitle, isFree = false } = Astro.props;
       
       try {
         // Store enrollment data in PostgreSQL database via API
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
         const response = await fetch('/api/enrollment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: jsonData
+          body: jsonData,
+          signal: controller.signal
         });
         
+        clearTimeout(timeoutId);
         const result = await response.json();
         
         if (!response.ok || !result.success) {
@@ -295,7 +300,18 @@ const { courseId, courseTitle, isFree = false } = Astro.props;
         form.reset();
       } catch (error) {
         console.error('Enrollment error:', error);
-        alert('Sorry, there was an error processing your enrollment. Please try again or contact us directly.');
+        
+        let errorMessage = 'Sorry, there was an error processing your enrollment. Please try again or contact us directly.';
+        
+        if (error.name === 'AbortError') {
+          errorMessage = 'Request timed out. Please check your connection and try again.';
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'The request is taking longer than expected. Please try again.';
+        } else if (error.message.includes('connection')) {
+          errorMessage = 'Connection error. Please check your internet connection and try again.';
+        }
+        
+        alert(errorMessage);
       } finally {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;

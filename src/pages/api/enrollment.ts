@@ -5,6 +5,12 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    // Add overall timeout for the entire request
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Request timeout')), 25000)
+    );
+    
+    const processRequest = async () => {
     // Check Content-Type header
     const contentType = request.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
@@ -79,11 +85,27 @@ export const POST: APIRoute = async ({ request }) => {
     } else {
       throw new Error(result.error);
     }
+    };
+    
+    return await Promise.race([processRequest(), timeoutPromise]);
     
   } catch (error) {
     console.error('Enrollment error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
+    
+    // Provide more specific error messages
+    let errorMessage = 'Internal server error';
+    let statusCode = 500;
+    
+    if (error.message.includes('timeout')) {
+      errorMessage = 'Request timed out. Please try again.';
+      statusCode = 408;
+    } else if (error.message.includes('connection')) {
+      errorMessage = 'Database connection failed. Please try again later.';
+      statusCode = 503;
+    }
+    
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: statusCode,
       headers: { 'Content-Type': 'application/json' }
     });
   }

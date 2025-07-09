@@ -9,8 +9,13 @@ const pool = new Pool({
   password: import.meta.env.VITE_DB_PASSWORD,
   ssl: import.meta.env.VITE_DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  idleTimeoutMillis: 60000,
+  connectionTimeoutMillis: 15000,
+  acquireTimeoutMillis: 60000,
+  createTimeoutMillis: 30000,
+  destroyTimeoutMillis: 5000,
+  reapIntervalMillis: 1000,
+  createRetryIntervalMillis: 200,
 });
 
 // Database types
@@ -44,8 +49,16 @@ export interface EnrollmentSubmission {
 
 // Database functions
 export async function submitContactForm(data: Omit<ContactSubmission, 'id' | 'created_at' | 'updated_at'>) {
-  const client = await pool.connect();
+  let client;
   try {
+    // Add timeout for getting client from pool
+    client = await Promise.race([
+      pool.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database connection timeout')), 10000)
+      )
+    ]);
+    
     const query = `
       INSERT INTO contact_submissions (first_name, last_name, email, phone, course_interest, message)
       VALUES ($1, $2, $3, $4, $5, $6)
@@ -61,23 +74,50 @@ export async function submitContactForm(data: Omit<ContactSubmission, 'id' | 'cr
       data.message
     ];
     
-    const result = await client.query(query, values);
+    // Add timeout for query execution
+    const result = await Promise.race([
+      client.query(query, values),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Query execution timeout')), 15000)
+      )
+    ]);
     
     // Send notification
-    await sendNotification('contact', result.rows[0]);
+    try {
+      await sendNotification('contact', result.rows[0]);
+    } catch (notificationError) {
+      console.warn('Failed to send notification, but contact form was successful:', notificationError);
+    }
     
     return { success: true, data: result.rows[0] };
   } catch (error) {
     console.error('Contact form submission error:', error);
-    return { success: false, error: error.message };
+    return { 
+      success: false, 
+      error: error.message || 'Database connection failed. Please try again.' 
+    };
   } finally {
-    client.release();
+    if (client) {
+      try {
+        client.release();
+      } catch (releaseError) {
+        console.error('Error releasing database client:', releaseError);
+      }
+    }
   }
 }
 
 export async function submitEnrollmentForm(data: Omit<EnrollmentSubmission, 'id' | 'created_at' | 'updated_at'>) {
-  const client = await pool.connect();
+  let client;
   try {
+    // Add timeout for getting client from pool
+    client = await Promise.race([
+      pool.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database connection timeout')), 10000)
+      )
+    ]);
+    
     const query = `
       INSERT INTO enrollment_submissions (course_id, first_name, last_name, email, phone, experience_level, learning_goals, is_free)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -95,17 +135,36 @@ export async function submitEnrollmentForm(data: Omit<EnrollmentSubmission, 'id'
       data.is_free
     ];
     
-    const result = await client.query(query, values);
+    // Add timeout for query execution
+    const result = await Promise.race([
+      client.query(query, values),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Query execution timeout')), 15000)
+      )
+    ]);
     
     // Send notification
-    await sendNotification('enrollment', result.rows[0]);
+    try {
+      await sendNotification('enrollment', result.rows[0]);
+    } catch (notificationError) {
+      console.warn('Failed to send notification, but enrollment was successful:', notificationError);
+    }
     
     return { success: true, data: result.rows[0] };
   } catch (error) {
     console.error('Enrollment form submission error:', error);
-    return { success: false, error: error.message };
+    return { 
+      success: false, 
+      error: error.message || 'Database connection failed. Please try again.' 
+    };
   } finally {
-    client.release();
+    if (client) {
+      try {
+        client.release();
+      } catch (releaseError) {
+        console.error('Error releasing database client:', releaseError);
+      }
+    }
   }
 }
 
