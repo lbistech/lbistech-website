@@ -230,6 +230,13 @@ const { courseId, courseTitle, isFree = false } = Astro.props;
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
       
+      // Check if data is empty or invalid
+      const jsonData = JSON.stringify(data);
+      if (!jsonData || jsonData === '{}' || Object.keys(data).length === 0) {
+        alert('Form data is empty. Please fill out the form and try again.');
+        return;
+      }
+      
       // Basic validation
       if (!data.firstName || !data.lastName || !data.email || !data.phone || !data.terms) {
         alert('Please fill in all required fields and accept the terms.');
@@ -257,7 +264,7 @@ const { courseId, courseTitle, isFree = false } = Astro.props;
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data)
+          body: jsonData
         });
         
         const result = await response.json();
