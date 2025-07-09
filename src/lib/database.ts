@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 
 // Database configuration
 const pool = new Pool({
-  host: import.meta.env.DB_HOST || 'localhost',
+  host: import.meta.env.DB_HOST || '3.127.229.147',
   port: parseInt(import.meta.env.DB_PORT || '5432'),
   database: import.meta.env.DB_NAME || 'lbistech_website',
   user: import.meta.env.DB_USER || 'lbistech_user',
