@@ -15,12 +15,6 @@ export async function getStaticPaths() {
 }
 
 const { course } = Astro.props;
-
-// Handle case where course doesn't exist
-if (!course) {
-  return Astro.redirect('/404');
-}
-
 const trainer = trainers.find(t => t.courses.includes(course.id));
 const relatedCourses = courses.filter(c => c.id !== course.id && c.level === course.level).slice(0, 3);
 
