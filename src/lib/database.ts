@@ -2,12 +2,12 @@ import { Pool } from 'pg';
 
 // Database configuration
 const pool = new Pool({
-  host: import.meta.env.DB_HOST || '3.127.229.147',
-  port: parseInt(import.meta.env.DB_PORT || '5432'),
-  database: import.meta.env.DB_NAME || 'lbistech_website',
-  user: import.meta.env.DB_USER || 'lbistech_user',
-  password: import.meta.env.DB_PASSWORD,
-  ssl: import.meta.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  host: import.meta.env.VITE_DB_HOST || '3.127.229.147',
+  port: parseInt(import.meta.env.VITE_DB_PORT || '5432'),
+  database: import.meta.env.VITE_DB_NAME || 'lbistech_website',
+  user: import.meta.env.VITE_DB_USER || 'lbistech_user',
+  password: import.meta.env.VITE_DB_PASSWORD,
+  ssl: import.meta.env.VITE_DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
