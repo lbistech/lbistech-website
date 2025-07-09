@@ -228,7 +228,19 @@ const { courseId, courseTitle, isFree = false } = Astro.props;
       e.preventDefault();
       
       const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
+      
+      // Explicitly extract form field values
+      const data = {
+        courseId: formData.get('courseId') || '',
+        isFree: formData.get('isFree') || 'false',
+        firstName: formData.get('firstName') || '',
+        lastName: formData.get('lastName') || '',
+        email: formData.get('email') || '',
+        phone: formData.get('phone') || '',
+        experience: formData.get('experience') || '',
+        goals: formData.get('goals') || '',
+        terms: formData.get('terms') || ''
+      };
       
       // Check if data is empty or invalid
       const jsonData = JSON.stringify(data);
