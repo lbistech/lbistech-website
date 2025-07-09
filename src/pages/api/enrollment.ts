@@ -3,8 +3,37 @@ import { submitEnrollmentForm } from '../../lib/database';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    // Parse JSON request body
-    const data = await request.json();
+    // Check Content-Type header
+    const contentType = request.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return new Response(JSON.stringify({ error: 'Content-Type must be application/json' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Read request body as text first
+    const bodyText = await request.text();
+    
+    // Check if body is empty
+    if (!bodyText || bodyText.trim() === '') {
+      return new Response(JSON.stringify({ error: 'Request body is empty' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Parse JSON with error handling
+    let data;
+    try {
+      data = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      return new Response(JSON.stringify({ error: 'Invalid JSON format' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
     
     // Validate required fields
     if (!data.firstName || !data.lastName || !data.email || !data.phone || !data.courseId) {
