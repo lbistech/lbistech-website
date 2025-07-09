@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { submitEnrollmentForm } from '../../lib/database';
 
+export const prerender = false;
+
 export const POST: APIRoute = async ({ request }) => {
   try {
     // Check Content-Type header
