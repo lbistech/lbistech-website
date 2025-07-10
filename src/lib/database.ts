@@ -2,12 +2,12 @@ import { Pool } from 'pg';
 
 // Database configuration
 const pool = new Pool({
-  host: import.meta.env.VITE_DB_HOST || '63.177.40.165',
-  port: parseInt(import.meta.env.VITE_DB_PORT || '5432'),
-  database: import.meta.env.VITE_DB_NAME || 'lbistech_website',
-  user: import.meta.env.VITE_DB_USER || 'lbistech_user',
-  password: import.meta.env.VITE_DB_PASSWORD,
-  ssl: import.meta.env.VITE_DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  host: process.env.DB_HOST || '63.177.40.165',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  database: process.env.DB_NAME || 'lbistech_website',
+  user: process.env.DB_USER || 'lbistech_user',
+  password: process.env.DB_PASSWORD,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   max: 20,
   idleTimeoutMillis: 60000,
   connectionTimeoutMillis: 15000,
@@ -234,12 +234,12 @@ async function sendNotification(type: 'contact' | 'enrollment', data: any) {
     const nodemailer = await import('nodemailer');
     
     const transporter = nodemailer.default.createTransporter({
-      host: import.meta.env.SMTP_HOST,
-      port: parseInt(import.meta.env.SMTP_PORT || '587'),
-      secure: import.meta.env.SMTP_SECURE === 'true',
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_SECURE === 'true',
       auth: {
-        user: import.meta.env.SMTP_USER,
-        pass: import.meta.env.SMTP_PASS,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
 
@@ -256,8 +256,8 @@ async function sendNotification(type: 'contact' | 'enrollment', data: any) {
 
 function getContactEmailData(data: any) {
   return {
-    from: import.meta.env.SMTP_FROM || 'noreply@lbistech.com',
-    to: import.meta.env.ADMIN_EMAIL || 'info@lbistech.com',
+    from: process.env.SMTP_FROM || 'noreply@lbistech.com',
+    to: process.env.ADMIN_EMAIL || 'info@lbistech.com',
     subject: `New Contact Form Submission - ${data.first_name} ${data.last_name}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -286,8 +286,8 @@ function getContactEmailData(data: any) {
 
 function getEnrollmentEmailData(data: any) {
   return {
-    from: import.meta.env.SMTP_FROM || 'noreply@lbistech.com',
-    to: import.meta.env.ADMIN_EMAIL || 'info@lbistech.com',
+    from: process.env.SMTP_FROM || 'noreply@lbistech.com',
+    to: process.env.ADMIN_EMAIL || 'info@lbistech.com',
     subject: `New Course Enrollment - ${data.course_id} - ${data.first_name} ${data.last_name}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
