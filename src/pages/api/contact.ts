@@ -5,7 +5,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Parse JSON request body
     const data = await request.json();
-    
+      setTimeout(() => reject(new Error('Request timeout')), 60000)
     // Validate required fields
     if (!data.firstName || !data.lastName || !data.email || !data.message) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {

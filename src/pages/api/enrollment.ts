@@ -7,7 +7,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Add overall timeout for the entire request
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Request timeout')), 25000)
+      setTimeout(() => reject(new Error('Request timeout')), 60000)
     );
     
     const processRequest = async () => {

@@ -55,7 +55,7 @@ export async function submitContactForm(data: Omit<ContactSubmission, 'id' | 'cr
     client = await Promise.race([
       pool.connect(),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database connection timeout')), 10000)
+        setTimeout(() => reject(new Error('Database connection timeout')), 30000)
       )
     ]);
     
@@ -78,7 +78,7 @@ export async function submitContactForm(data: Omit<ContactSubmission, 'id' | 'cr
     const result = await Promise.race([
       client.query(query, values),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Query execution timeout')), 15000)
+        setTimeout(() => reject(new Error('Query execution timeout')), 45000)
       )
     ]);
     
@@ -114,7 +114,7 @@ export async function submitEnrollmentForm(data: Omit<EnrollmentSubmission, 'id'
     client = await Promise.race([
       pool.connect(),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database connection timeout')), 10000)
+        setTimeout(() => reject(new Error('Database connection timeout')), 30000)
       )
     ]);
     
@@ -139,7 +139,7 @@ export async function submitEnrollmentForm(data: Omit<EnrollmentSubmission, 'id'
     const result = await Promise.race([
       client.query(query, values),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Query execution timeout')), 15000)
+        setTimeout(() => reject(new Error('Query execution timeout')), 45000)
       )
     ]);
     
